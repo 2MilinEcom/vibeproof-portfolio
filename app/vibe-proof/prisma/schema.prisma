@@ -1,0 +1,255 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:dev.sqlite"
+}
+
+model Session {
+  id                  String    @id
+  shop                String
+  state               String
+  isOnline            Boolean   @default(false)
+  scope               String?
+  expires             DateTime?
+  accessToken         String
+  userId              BigInt?
+  firstName           String?
+  lastName            String?
+  email               String?
+  accountOwner        Boolean   @default(false)
+  locale              String?
+  collaborator        Boolean?  @default(false)
+  emailVerified       Boolean?  @default(false)
+  refreshToken        String?
+  refreshTokenExpires DateTime?
+}
+
+model Review {
+  id              String  @id @default(cuid())
+  shop            String
+  productId       String
+  productHandle   String?
+  productTitle    String?
+  variantId       String?
+  variantTitle    String?
+  reviewRequestId String?
+
+  rating        Int
+  title         String?
+  body          String
+  reviewerName  String
+  reviewerEmail String?
+
+  verifiedPurchase Boolean @default(false)
+  status           String  @default("PENDING")
+  source           String  @default("CUSTOMER")
+  importKey        String? @unique
+  helpfulCount     Int     @default(0)
+  featured         Boolean @default(false)
+  demoBatchId      String?
+  spamScore        Int     @default(0)
+  moderationNote   String?
+  language         String?
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  publishedAt DateTime?
+  editedAt    DateTime?
+
+  media         ReviewMedia[]
+  merchantReply MerchantReply?
+
+  @@index([shop, productId])
+  @@index([shop, productHandle])
+  @@index([shop, status])
+  @@index([shop, source])
+  @@index([shop, featured])
+  @@index([shop, createdAt])
+  @@index([reviewRequestId])
+}
+
+model ReviewMedia {
+  id         String   @id @default(cuid())
+  reviewId   String
+  type       String
+  url        String?
+  storageKey String?
+  mimeType   String?
+  bytes      Int?
+  altText    String?
+  status     String   @default("READY")
+  position   Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@index([reviewId, position])
+  @@index([status])
+}
+
+model MerchantReply {
+  id           String   @id @default(cuid())
+  reviewId     String   @unique
+  body         String
+  merchantName String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+}
+
+model CollectionSettings {
+  id                    String   @id @default(cuid())
+  shop                  String   @unique
+  collectRating         Boolean  @default(true)
+  collectTitle          Boolean  @default(true)
+  collectBody           Boolean  @default(true)
+  collectEmail          Boolean  @default(true)
+  collectPhoto          Boolean  @default(true)
+  collectVideo          Boolean  @default(true)
+  requireEmail          Boolean  @default(true)
+  autoApproveFiveStar   Boolean  @default(false)
+  reviewRequestsEnabled Boolean  @default(false)
+  requestDelayHours     Int      @default(48)
+  requestExpiryDays     Int      @default(30)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
+model WidgetTheme {
+  id                  String   @id @default(cuid())
+  shop                String   @unique
+  layout              String   @default("SOCIAL_FEED")
+  heading             String   @default("THE GIRLIES SAID IT BEST")
+  accentColor         String   @default("#111111")
+  backgroundColor     String   @default("#FFFFFF")
+  textColor           String   @default("#111111")
+  borderColor         String   @default("#E5E7EB")
+  radius              Int      @default(18)
+  mediaRatio          String   @default("4/5")
+  showVerified        Boolean  @default(true)
+  showHelpful         Boolean  @default(true)
+  showMerchantReplies Boolean  @default(true)
+  autoMatch           Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model ProductConfig {
+  id                  String   @id @default(cuid())
+  shop                String
+  productId           String
+  productHandle       String?
+  productTitle        String?
+  enabled             Boolean  @default(true)
+  layoutOverride      String?
+  headingOverride     String?
+  accentColorOverride String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@unique([shop, productId])
+  @@index([shop, productHandle])
+  @@index([shop, enabled])
+}
+
+model AnalyticsEvent {
+  id          String   @id @default(cuid())
+  shop        String
+  type        String
+  productId   String?
+  reviewId    String?
+  visitorHash String?
+  eventKey    String?  @unique
+  metadata    String?
+  createdAt   DateTime @default(now())
+
+  @@index([shop, createdAt])
+  @@index([shop, type, createdAt])
+  @@index([shop, productId, createdAt])
+}
+
+model HelpfulVote {
+  id        String   @id @default(cuid())
+  shop      String
+  reviewId  String
+  voterHash String
+  createdAt DateTime @default(now())
+
+  @@unique([reviewId, voterHash])
+  @@index([shop, createdAt])
+  @@index([reviewId])
+}
+
+model ReviewRequest {
+  id             String   @id @default(cuid())
+  shop           String
+  tokenHash      String   @unique
+  tokenEncrypted String
+  emailHash      String
+  emailEncrypted String
+  orderId        String?
+  productId      String
+  productHandle  String?
+  productTitle   String?
+  variantId      String?
+  variantTitle   String?
+  status         String   @default("PENDING")
+  sendAfter      DateTime
+  expiresAt      DateTime
+  sentAt         DateTime?
+  openedAt       DateTime?
+  completedAt    DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([shop, status, sendAfter])
+  @@index([shop, orderId])
+  @@index([shop, productId])
+}
+
+model ImportJob {
+  id              String   @id @default(cuid())
+  shop            String
+  filename        String
+  externalBatchId String?
+  status       String   @default("PROCESSING")
+  totalRows    Int      @default(0)
+  importedRows Int      @default(0)
+  skippedRows  Int      @default(0)
+  errorsJson   String?
+  createdAt    DateTime @default(now())
+  completedAt  DateTime?
+
+  @@index([shop, createdAt])
+  @@unique([shop, externalBatchId])
+}
+
+model PrivacyRequest {
+  id            String   @id @default(cuid())
+  shop          String
+  requestId     String
+  type          String   @default("DATA_REQUEST")
+  customerEmail String?
+  payloadJson   String?
+  status        String   @default("PENDING")
+  createdAt     DateTime @default(now())
+  completedAt   DateTime?
+
+  @@unique([shop, requestId])
+  @@index([shop, status, createdAt])
+}
+
+model RateLimitBucket {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  count     Int      @default(0)
+  resetAt   DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([resetAt])
+}

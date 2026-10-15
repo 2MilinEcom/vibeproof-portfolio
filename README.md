@@ -1,17 +1,28 @@
 # VibeProof
 
-Product reviews application with merchant moderation, storefront widgets, and clearly labeled AI previews.
+I built VibeProof to make product reviews feel more like the social content shoppers already browse. I worked on both the merchant tools and the storefront experience.
 
-## Technology
+I included review collection and moderation, appearance settings, review request workflows, and storefront blocks for ratings, feeds, and galleries. I kept generated preview reviews separate from genuine customer reviews so they do not change real ratings or verified purchase status.
 
-TypeScript, React Router, Prisma.
+## Built with
 
-## Run locally
+I used TypeScript, React Router, Prisma, and Shopify theme extensions.
 
-The application is under `app/vibe-proof`. Follow its README to install dependencies and configure your own development application, database, and local environment. Root `docs/` documents the architecture. Local CLI sessions and merchant development bundles are excluded.
+## Inside the project
 
-## Portfolio snapshot
+* `app/vibe-proof/app/`: the merchant app and server routes.
+* `app/vibe-proof/extensions/`: storefront review blocks.
+* `app/vibe-proof/prisma/`: database schema and migrations.
+* `docs/`: architecture and data model notes.
 
-This repository contains a source snapshot of a personal project. Personal records, credentials, browser sessions, local databases, and generated output are excluded. Use your own configuration and fictional data when evaluating it. Some integrations require external accounts or additional setup. This is a development project, with feature limitations documented in the source and guides.
+## Running it
 
-See [the project guide](PROJECT_GUIDE.md) for implementation details and earlier development notes. Verification claims in that guide describe the original working copy; they are not a fresh end-to-end test of this portfolio snapshot.
+I work from `app/vibe-proof`. I follow its README to install dependencies, configure my own development app and database, and start the development server.
+
+I keep local account sessions, store data, and credentials out of this portfolio copy. My earlier planning notes are in the separate [VibeProof repository](https://github.com/2MilinEcom/VibeProof).
+
+## More detail
+
+* [Application setup](app/vibe-proof/README.md)
+* [Architecture](docs/architecture.md)
+* [Data model](docs/data-model.md)
